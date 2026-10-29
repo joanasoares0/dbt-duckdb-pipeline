@@ -1,5 +1,7 @@
 # Automated Job Postings Pipeline (v1): dbt + DuckDB
 
+**🌐 Live dbt docs:** [joanasoares0.github.io/dbt-duckdb-pipeline](https://joanasoares0.github.io/dbt-duckdb-pipeline/)
+
 ![Project 1: Local Pipeline](img/project_1.png)
 
 An end-to-end analytics engineering pipeline built on **12 months of job postings** (Jul 2025 – Jun 2026). Raw parquet files are modeled with **dbt**, built into a **DuckDB** warehouse, and published as a single `prod.duckdb` file that anyone can query. **GitHub Actions** rebuilds it on every push to `main` and once a week.

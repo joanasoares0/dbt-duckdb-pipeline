@@ -1,5 +1,7 @@
 # `analytics`: the dbt project
 
+**🌐 Live dbt docs:** [joanasoares0.github.io/dbt-duckdb-pipeline](https://joanasoares0.github.io/dbt-duckdb-pipeline/)
+
 ![Project 1: Local Pipeline](../img/project_1.png)
 
 This is the dbt project behind the **Automated Job Postings Pipeline (v1)**. It turns 12 months of raw job-posting parquet files into a small, tested and documented DuckDB warehouse.
