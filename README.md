@@ -40,7 +40,7 @@ source: raw.job_postings  (read_parquet ../data/raw/raw_job_postings_*.parquet)
          └── top_locations     (table: top 10 locations)
 ```
 
-You'll find more detail on the models in [`analytics/README.md`](analytics/README.md).
+📖 **[Browse the dbt docs](https://joanasoares0.github.io/dbt-duckdb-pipeline/)** to see the lineage graph, model and column descriptions, and tests. They're hosted on GitHub Pages. You'll find more detail on the models in [`analytics/README.md`](analytics/README.md).
 
 ---
 

@@ -44,6 +44,10 @@ raw.job_postings (source)
 
 ---
 
+📖 You can browse the interactive lineage on the **[hosted dbt docs](https://joanasoares0.github.io/dbt-duckdb-pipeline/)**.
+
+---
+
 ## ✅ Tests
 
 | Model | Column | Tests |
