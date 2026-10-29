@@ -16,3 +16,4 @@ seeds:
 
 models:
   analytics:
+    +materialized: table

@@ -1,3 +1,9 @@
+{{
+  config(
+    materialized = 'view',
+    )
+}}
+
 -- all job postings, minus scraper error rows 
 SELECT
     job_id,
