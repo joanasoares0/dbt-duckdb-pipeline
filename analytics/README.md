@@ -18,7 +18,7 @@ This is the dbt project behind the **Automated Job Postings Pipeline (v1)**. It 
   - *How is demand trending for each role?* → `jobs_per_month`
   - *How many postings are remote each month?* → `monthly_summary`
   - *Where are the jobs?* → `top_locations`
-- **Tests the grain of each mart** with `unique` and `not_null`.
+- **Tests the grain of each mart** with `unique` and `not_null`, plus `dbt_utils.unique_combination_of_columns` for the two-column grain of `jobs_per_month`.
 - **Documents everything.** Model and column descriptions live in `_schema.yml` and are persisted to DuckDB with `persist_docs`.
 
 ---
@@ -29,7 +29,7 @@ This is the dbt project behind the **Automated Job Postings Pipeline (v1)**. It 
 |---|---|---|---|
 | `job_postings` | view | one row per posting scrape | Cleaned postings: 9 named columns, rows with `error IS NOT NULL` removed |
 | `jobs_per_month` | table | month × role | Posting counts per search role per month |
-| `monthly_summary` | table | month | Total postings, remote postings and `pct_remote` |
+| `monthly_summary` | table | month | Total postings, remote postings and `pct_remote` (a `LEFT JOIN` keeps months with zero remote postings, shown as 0) |
 | `top_locations` | table | location | Top 10 locations by posting count |
 
 Models are materialized as **tables** by default (`dbt_project.yml`). The staging model overrides this to a **view**.
@@ -46,7 +46,7 @@ raw.job_postings (source)
 
 ---
 
-📖 You can browse the interactive lineage on the **[hosted dbt docs](https://joanasoares0.github.io/dbt-duckdb-pipeline/)**.
+📖 You can browse the interactive lineage on the **[hosted dbt docs](https://joanasoares0.github.io/dbt-duckdb-pipeline/)**. CI regenerates them on every pull request and commits them to the PR branch, so editing a description in `_schema.yml` or adding a model updates the site when the PR merges. No manual step is needed. See [`ci/README.md`](../ci/README.md) for details.
 
 ---
 
@@ -55,6 +55,7 @@ raw.job_postings (source)
 | Model | Column | Tests |
 |---|---|---|
 | `job_postings` | `job_title` | `not_null` |
+| `jobs_per_month` | `month`, `role` | `not_null` on each, `dbt_utils.unique_combination_of_columns` on the pair |
 | `monthly_summary` | `month` | `not_null`, `unique` |
 | `top_locations` | `job_location` | `not_null`, `unique` |
 
@@ -78,6 +79,12 @@ CI runs the same build against the `prod` target:
 uv run dbt build --profiles-dir ../ci   # writes ../data/prod.duckdb
 ```
 
+On pull requests, CI also writes the docs site into the repo's `docs/` folder:
+
+```bash
+uv run dbt docs generate --no-compile --profiles-dir ../ci --output-dir ../docs
+```
+
 ---
 
 ## 📂 Structure
@@ -92,7 +99,7 @@ analytics/
 │   ├── monthly_summary.sql # mart
 │   └── top_locations.sql   # mart
 ├── dbt_project.yml
-└── packages.yml            # dbt-labs/dbt_utils
+└── packages.yml            # dbt-labs/dbt_utils (grain tests)
 ```
 
 ← Back to the [project README](../README.md).

@@ -2,22 +2,61 @@ name: dbt build & publish
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]        # PRs build + refresh the docs, but never publish
   schedule:
     - cron: '17 6 * * 1'    # Mondays — the pipeline runs while you sleep
   workflow_dispatch:        # …and a manual Run button
 permissions:
-  contents: write           # lets the workflow update the release
+  contents: write           # lets the workflow update the release and push docs
+concurrency:
+  group: dbt-build-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # On a PR, check out the PR branch itself (not the merge commit),
+          # so the regenerated docs can be committed back to it.
+          ref: ${{ github.head_ref || github.ref }}
       - uses: astral-sh/setup-uv@v5
       - run: uv sync
       - run: uv run python scripts/download_data.py
       - run: uv run dbt build --profiles-dir ../ci
         working-directory: analytics
-      - run: |
+
+      # ---------- Pull requests only: refresh the docs site ----------
+      - name: Generate dbt docs into docs/
+        if: github.event_name == 'pull_request'
+        run: |
+          find ../docs -mindepth 1 ! -name .nojekyll -exec rm -rf {} +
+          uv run dbt docs generate --no-compile --profiles-dir ../ci --output-dir ../docs
+        working-directory: analytics
+      - name: Commit updated docs to the PR branch
+        # Forks get a read-only token, so only commit for branches in this repo.
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs
+          if git diff --cached --quiet; then
+            echo "Docs unchanged"
+          else
+            git commit -m "docs: regenerate dbt docs"
+            git pull --rebase origin "$HEAD_REF"
+            git push origin "HEAD:$HEAD_REF"
+          fi
+
+      # ---------- Everything except PRs: publish the warehouse ----------
+      - name: Publish prod.duckdb to the warehouse release
+        if: github.event_name != 'pull_request'
+        run: |
           gh release create warehouse --notes "Warehouse — auto-built by dbt" || true
           gh release upload warehouse data/prod.duckdb --clobber
         env:

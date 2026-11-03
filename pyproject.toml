@@ -1,7 +1,7 @@
 [project]
 name = "dbt-duckdb-pipeline"
 version = "0.1.0"
-description = "Add your description here"
+description = "Automated job postings pipeline: dbt models on DuckDB, built and published by GitHub Actions"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

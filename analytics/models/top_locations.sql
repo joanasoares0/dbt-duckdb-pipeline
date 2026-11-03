@@ -1,4 +1,4 @@
--- where the jobs are
+-- where the top 10 jobs are
 SELECT
     job_location,
     COUNT(*) AS postings

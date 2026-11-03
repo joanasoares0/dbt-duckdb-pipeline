@@ -28,7 +28,11 @@ models:
         description: Role the scraper searched for.
 
   - name: jobs_per_month
-    description: Monthly posting counts by role.
+    description: Monthly posting counts by role; one row per month × role.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, role]
     config:
       persist_docs:
         relation: true
@@ -36,8 +40,12 @@ models:
     columns:
       - name: month
         description: Posting month, truncated from search_date.
+        data_tests:
+          - not_null
       - name: role
         description: Search role (search_term).
+        data_tests:
+          - not_null
       - name: postings
         description: Postings counted for the role that month.
 

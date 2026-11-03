@@ -16,3 +16,6 @@ logs/
 
 #dbt generated files
 .user.yml
+
+# editor settings (local paths)
+.vscode/
